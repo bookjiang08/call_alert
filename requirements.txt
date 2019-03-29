@@ -1,0 +1,16 @@
+certifi==2018.11.29
+chardet==3.0.4
+Click==7.0
+Flask==1.0.2
+idna==2.8
+interval==1.0.0
+itsdangerous==1.1.0
+Jinja2==2.10
+jmespath==0.9.3
+MarkupSafe==1.1.0
+pycrypto==2.6.1
+pycryptodome==3.7.2
+requests==2.21.0
+urllib3==1.24.1
+uWSGI==2.0.17.1
+Werkzeug==0.14.1
