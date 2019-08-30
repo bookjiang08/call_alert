@@ -21,7 +21,7 @@ ACCESS_KEY_SECRET = "*****"
 acs_client = AcsClient(ACCESS_KEY_ID, ACCESS_KEY_SECRET, REGION)
 region_provider.add_endpoint(PRODUCT_NAME,REGION,DOMAIN)
 
-def tts_call(called_number, tts_param=None, business_id=uuid.uuid1(), called_show_number="073182705509", tts_code='TTS_147435338'):
+def tts_call(called_number, tts_param=None, business_id=uuid.uuid1(), called_show_number="*********", tts_code='********'):
     ttsRequest = SingleCallByTtsRequest.SingleCallByTtsRequest()
     # 申请的语音通知tts模板编码,必填
     ttsRequest.set_TtsCode(tts_code)
@@ -37,8 +37,3 @@ def tts_call(called_number, tts_param=None, business_id=uuid.uuid1(), called_sho
     # 调用tts文本呼叫接口，返回json
     ttsResponse = acs_client.do_action_with_exception(ttsRequest)
     return ttsResponse
-
-#if __name__ == '__main__':
-#    params = {"taskname":"服务12345", "name":"陈禹"}
-#    params = json.dumps(params)
-#    print tts_call("152*********", params)

@@ -39,20 +39,20 @@ def create_app():
 
     @app.route(api_prefix+'db', methods=['POST'])
     def db_alert():
-        content_name = '天元'
+        content_name = '您好'
         alert_status = re.findall(r"\[(.*?)\]", request.form.get('content'))[1]
         alert_level = re.findall(r"\[(.*?)\]", request.form.get('content'))[0]
         if alert_status == 'PROBLEM' and alert_level < "P3":
-            phonenum = request.form.get('tos')
+            phonenums = request.form.get('tos').split(',')
             content_ip = re.findall(r"\[(.*?)\]", request.form.get('content'))[2]
             content_info = request.form.get('content').split(' ')[2]
             content_ip_convert = tool.ip_convert(content_ip)
             call_content = (content_ip_convert + content_info).replace('.', '点')
-            params = {"taskname":"{}".format(call_content), "name":"{}".format(content_name),
-                   "phonenum": "{}".format(phonenum)}
-            params.pop('phonenum', None)
-            result = call_method.tts_call(phonenum, json.dumps(params))
-            print(json.loads(result))
+            for phonenum in phonenums:
+                params = {"taskname":"{}".format(call_content), "name":"{}".format(content_name),
+                          "phonenum": "{}".format(phonenum)}
+                params.pop('phonenum', None)
+                result = call_method.tts_call(phonenum, json.dumps(params))
         elif alert_status != 'PROBLEM':
             params = {"result": "恢复不报警.."}
         elif alert_level >= "P3":
@@ -60,6 +60,23 @@ def create_app():
         else:
             params = {"result": "其他问题.."}
         logger.info(json.dumps(params, ensure_ascii=False))
-        return json.dumps(params, ensure_ascii=False)
+        return jsonify(json.loads(result))
+
+    @app.route(api_prefix+'prome', methods=['POST'])
+    def prome_alert():
+        content_name = "您好"
+        phonenums = [i for i in open("./prome_phone.number").read().strip().split(',')]
+        alert_info = json.loads(request.data)
+        call_content = "容器集群" + alert_info['groupLabels']['alertname']
+        alert_status = alert_info['status']
+        if alert_status == "firing":
+            for phonenum in phonenums:
+                params = {"taskname":"{}".format(call_content), "name":"{}".format(content_name),
+                          "phonenum": "{}".format(phonenum)}
+                result = call_method.tts_call(phonenum, json.dumps(params))
+        elif alert_status == "resolved":
+            params = {"result": "恢复不电话报警.."}
+        logger.info(json.dumps(params, ensure_ascii=False))
+        return jsonify(json.loads(result))
 
     return app
