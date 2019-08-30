@@ -13,13 +13,14 @@ from tools import call_method, tool
 
 path = os.path.dirname(os.path.abspath(__file__))
 parent_path = os.path.dirname(path)
-log_name ='{}/server.log'.format(os.path.join(parent_path, 'logs'))
+log_name = '{}/server.log'.format(os.path.join(parent_path, 'logs'))
 logging.basicConfig(level=logging.INFO,
                     filename=log_name,
                     datefmt='%Y-%m-%d %H:%M:%S',
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 logger = logging.getLogger('server')
+
 
 def create_app():
     app = Flask(__name__)
@@ -30,8 +31,8 @@ def create_app():
         content_name = request.form.get('name')
         phonenum = request.form.get('tos')
         call_content = request.form.get('content')
-        params = {"taskname":"{}".format(call_content), "name":"{}".format(content_name),
-                   "phonenum": "{}".format(phonenum)}
+        params = {"taskname": "{}".format(call_content), "name": "{}".format(content_name),
+                  "phonenum": "{}".format(phonenum)}
         logger.info(json.dumps(params, ensure_ascii=False))
         params.pop('phonenum', None)
         result = call_method.tts_call(phonenum, json.dumps(params))
@@ -49,10 +50,11 @@ def create_app():
             content_ip_convert = tool.ip_convert(content_ip)
             call_content = (content_ip_convert + content_info).replace('.', '点')
             for phonenum in phonenums:
-                params = {"taskname":"{}".format(call_content), "name":"{}".format(content_name),
+                params = {"taskname": "{}".format(call_content), "name": "{}".format(content_name),
                           "phonenum": "{}".format(phonenum)}
                 params.pop('phonenum', None)
                 result = call_method.tts_call(phonenum, json.dumps(params))
+            return jsonify(json.loads(result))
         elif alert_status != 'PROBLEM':
             params = {"result": "恢复不报警.."}
         elif alert_level >= "P3":
@@ -60,7 +62,7 @@ def create_app():
         else:
             params = {"result": "其他问题.."}
         logger.info(json.dumps(params, ensure_ascii=False))
-        return jsonify(json.loads(result))
+        return json.dumps(params, ensure_ascii=False)
 
     @app.route(api_prefix+'prome', methods=['POST'])
     def prome_alert():
@@ -71,12 +73,13 @@ def create_app():
         alert_status = alert_info['status']
         if alert_status == "firing":
             for phonenum in phonenums:
-                params = {"taskname":"{}".format(call_content), "name":"{}".format(content_name),
+                params = {"taskname": "{}".format(call_content), "name": "{}".format(content_name),
                           "phonenum": "{}".format(phonenum)}
                 result = call_method.tts_call(phonenum, json.dumps(params))
+            return jsonify(json.loads(result))
         elif alert_status == "resolved":
             params = {"result": "恢复不电话报警.."}
         logger.info(json.dumps(params, ensure_ascii=False))
-        return jsonify(json.loads(result))
+        return json.dumps(params, ensure_ascii=False)
 
     return app
